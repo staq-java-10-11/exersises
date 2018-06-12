@@ -15,7 +15,12 @@ public class ServerPushExercise {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public CompletableFuture<ByteCountingExercise.BodyAndPushed> serverPushResponses(final String url) {
+    public static class BodyAndPushed {
+        public String body;
+        public Map<String, byte[]> pushed;
+    }
+
+    public CompletableFuture<BodyAndPushed> serverPushResponses(final String url) {
         // 1. Make an asynchronous request to "url", and return a future of a BodyAndPushed object, where "body" is
         // the body of the page returned, and "pushed" are the pushed resources as a map from url to body as a byte
         // array.
@@ -47,7 +52,7 @@ public class ServerPushExercise {
             var pushed = pushedFutures.entrySet().stream()
                     .filter(entry -> entry.getValue().join() != null)
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().join().body()));
-            var bodyAndPushed = new ByteCountingExercise.BodyAndPushed();
+            var bodyAndPushed = new BodyAndPushed();
             bodyAndPushed.body = new String(body);
             bodyAndPushed.pushed = pushed;
             return bodyAndPushed;
