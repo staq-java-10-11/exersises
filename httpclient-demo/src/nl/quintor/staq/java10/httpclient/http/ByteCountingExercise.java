@@ -26,6 +26,7 @@ public class ByteCountingExercise {
         // Count the number of returned bytes, without persisting the entire response in-memory.
         // Use HttpResponse.BodyHandler.fromSubscriber to wire up your ByteCountingSubscriber as a BodyHandler, and let
         // obtain the "body" from the Subscriber's byte count.
+        // BONUS: what happens when you wrap this BodyHandler into BodyHandler.buffering(...)?
         var responseFuture = httpClient.sendAsync(httpRequest,
                 HttpResponse.BodyHandler.fromSubscriber(new ByteCountingSubscriber(), ByteCountingSubscriber::getReceivedByteCount)
         );
@@ -57,7 +58,7 @@ public class ByteCountingExercise {
         @Override
         public void onNext(List<ByteBuffer> item) {
             // 2. Count the number of received bytes.
-            // Hint: the {@code remaining()} method on ByteBuffer gives the number of bytes in the buffer.
+            // Hint: the remaining() method on ByteBuffer gives the number of bytes in the buffer.
             final long bytes = item.stream().mapToLong(ByteBuffer::remaining).sum();
             received.addAndGet(bytes);
 
