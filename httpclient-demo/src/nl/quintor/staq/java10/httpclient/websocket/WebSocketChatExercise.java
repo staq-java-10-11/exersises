@@ -66,8 +66,7 @@ public class WebSocketChatExercise {
     private CompletableFuture<WebSocket> connect(String url) {
         // Use the httpClient to connect asynchronously to the given URL.
         // As a listener, specify the ChatWebsocketListener that will be implemented later.
-        return httpClient.newWebSocketBuilder()
-                .buildAsync(URI.create(url), new ChatWebsocketListener());
+        return CompletableFuture.failedFuture(new UnsupportedOperationException("not implemented"));
     }
 
     // 2. Start sending chat messages over the websocket
@@ -75,7 +74,7 @@ public class WebSocketChatExercise {
         var formattedMessage = '"' + message + '"';
         // Send the text message over the WebSocket.
         // Hint: take a close look a the documentation of the relevant method. What do the parameters mean?
-        return webSocket.sendText(formattedMessage, true);
+        return CompletableFuture.failedFuture(new UnsupportedOperationException("not implemented"));
     }
 
     // 3. Allow to close the websocket connection.
@@ -83,7 +82,7 @@ public class WebSocketChatExercise {
         // Close the websocket. Because all interactions with the websocket are asynchronous, don't wait for close to
         // succeed here!
         // Hint: You can use WebSocket.NORMAL_CLOSURE as statusCode and leave the reason empty.
-        var sendClose = webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "");
+        var sendClose = CompletableFuture.failedFuture(new UnsupportedOperationException("not implemented"));
         return sendClose
                 .thenRun(keepaliveExecutorService::shutdown);
     }
@@ -92,13 +91,9 @@ public class WebSocketChatExercise {
     // Hint: remember that HTTP Client WebSockets are reactive - they won't give you anything that you don't ask for!
     private class ChatWebsocketListener implements WebSocket.Listener {
 
-        private ScheduledFuture keepalive;
-
         @Override
         public void onOpen(WebSocket webSocket) {
-            webSocket.request(1);
             printConnectionOpened();
-            startSendingKeepalives(webSocket);
         }
 
         @Override
@@ -106,7 +101,6 @@ public class WebSocketChatExercise {
             // That's strange! We're already invoking `printReceivedChatMessage` here, but no messages gets printed...
             // Looks like the WebSocket is a bit lazy. Or maybe just reactive?
             // Can you figure out what is missing here? Where else is it missing?
-            webSocket.request(1);
             printReceivedChatMessage(message);
             return null;
         }
@@ -114,22 +108,12 @@ public class WebSocketChatExercise {
         @Override
         public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
             printConnectionClosed();
-            stopSendingKeepalives();
             return null;
         }
 
         @Override
         public void onError(WebSocket webSocket, Throwable error) {
             printConnectionError(error);
-            stopSendingKeepalives();
-        }
-
-        private void startSendingKeepalives(WebSocket webSocket) {
-            keepalive = keepaliveExecutorService.scheduleAtFixedRate(() -> webSocket.sendPing(ByteBuffer.allocate(0)), 0, 15, TimeUnit.SECONDS);
-        }
-
-        private void stopSendingKeepalives() {
-            keepalive.cancel(false);
         }
     }
 
