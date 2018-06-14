@@ -8,6 +8,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class BasicExercise {
@@ -24,19 +25,20 @@ public class BasicExercise {
                 .thenApply(HttpResponse::body);
     }
 
-    public CompletableFuture<List<String>> manySimpleResponses(final String url) {
+    public CompletableFuture<List<String>> manySimpleResponses(final String url, final int times) {
         var before = Thread.activeCount();
         var httpClient = HttpClient.newBuilder()
+                .executor(Executors.newCachedThreadPool())
                 .build();
         var futures = new ArrayList<CompletableFuture<HttpResponse<String>>>();
-        // 1. Make 100 requests to "url" asynchronously. Store the futures of the responses in "futures"
-        for (int i = 0; i < 20; i++) {
+        // 1. Make many requests to "url" asynchronously. Store the futures of the responses in "futures"
+        for (int i = 0; i < times; i++) {
             var httpRequest = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
             var responseFuture = httpClient.sendAsync(httpRequest, HttpResponse.BodyHandler.asString());
             futures.add(responseFuture);
         }
 
-        // 2. Try to lower the thread count. Does it work?
+        // 2. Try to lower the thread count by replacing the executor. Does it work?
         System.out.println((Thread.activeCount() - before) + " more threads are active");
 
         // 3. Return a future of a list of strings
