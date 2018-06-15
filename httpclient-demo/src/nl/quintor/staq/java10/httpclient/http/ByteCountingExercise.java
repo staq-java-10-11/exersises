@@ -16,23 +16,17 @@ public class ByteCountingExercise {
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public long countBytes(final String url) {
-        // Make an asynchronous request to the url
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .GET()
-                .timeout(Duration.ofSeconds(10))
-                .uri(URI.create(url))
-                .build();
-
+        // 1. Make an asynchronous request to the url
         // Count the number of returned bytes, without persisting the entire response in-memory.
         // Use HttpResponse.BodyHandler.fromSubscriber to wire up your ByteCountingSubscriber as a BodyHandler, and let
         // obtain the "body" from the Subscriber's byte count.
         // BONUS: what happens when you wrap this BodyHandler into BodyHandler.buffering(...)?
-        var responseFuture = httpClient.sendAsync(httpRequest,
-                HttpResponse.BodyHandler.fromSubscriber(new ByteCountingSubscriber(), ByteCountingSubscriber::getReceivedByteCount)
-        );
-        var response = responseFuture.join();
-        System.out.println("ByteCountingExercise is done -  status was " + response.statusCode() + "; response reported " + response.body() + " bytes");
-        return response.body();
+
+        // var responseFuture = ...
+        // var response = ...
+        // System.out.println("ByteCountingExercise is done -  status was " + response.statusCode() + "; response reported " + response.body() + " bytes");
+        // return response.body();
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -45,7 +39,7 @@ public class ByteCountingExercise {
 
         long getReceivedByteCount() {
             // 1. Return the number of bytes received so far.
-            return received.get();
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -59,10 +53,11 @@ public class ByteCountingExercise {
         public void onNext(List<ByteBuffer> item) {
             // 2. Count the number of received bytes.
             // Hint: the remaining() method on ByteBuffer gives the number of bytes in the buffer.
-            final long bytes = item.stream().mapToLong(ByteBuffer::remaining).sum();
-            received.addAndGet(bytes);
 
-            System.out.println("ByteCountingSubscriber received " + bytes + " bytes");
+            // final long bytes = ...
+            // received.addAndGet(bytes);
+            // System.out.println("ByteCountingSubscriber received " + bytes + " bytes");
+
             // What happens if you remove this line?
             subscription.request(1);
         }
